@@ -3,5 +3,8 @@
 *.py text eol=lf
 gradlew text eol=lf
 *.bat text eol=crlf
+*.cmd text eol=crlf
 *.jar binary
 *.png binary
+# Preserve the vendored Nayuki encoder byte-for-byte with the upstream whitespace.
+companion/qr/qrcodegen.py -whitespace

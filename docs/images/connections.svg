@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="368" viewBox="0 0 680 368" role="img" aria-labelledby="title desc">
+  <title id="title">自宅と外出先での接続</title>
+  <desc id="desc">自宅では同じWi-Fi、外出先ではTailscaleを通って、同じPCのForgeに接続します。初回のみPCのQRで端末を登録します。</desc>
+  <rect width="680" height="368" rx="18" fill="#f6f8f7"/>
+  <g font-family="system-ui,'Yu Gothic UI',sans-serif" fill="#173b3b">
+    <text x="28" y="47" font-size="26" font-weight="700">スマホから自分のPCへ</text>
+    <rect x="26" y="76" width="300" height="84" rx="12" fill="#e0f3ec"/>
+    <rect x="26" y="178" width="300" height="84" rx="12" fill="#e5edfa"/>
+    <text x="46" y="109" font-size="17">自宅</text>
+    <text x="46" y="140" font-size="22" font-weight="700">同じWi-Fi / LAN</text>
+    <text x="46" y="211" font-size="17" fill="#224569">外出先</text>
+    <text x="46" y="242" font-size="22" font-weight="700" fill="#224569">Tailscale</text>
+    <g fill="none" stroke-linecap="round" stroke-width="4">
+      <path d="M327 118h31q14 0 14 14v22q0 14 14 14h40" stroke="#177760"/>
+      <path d="M327 220h31q14 0 14-14v-22q0-14 14-14h40" stroke="#456b9d"/>
+      <path d="m414 159 12 10-12 10" stroke="#23474b"/>
+    </g>
+    <rect x="440" y="109" width="213" height="122" rx="14" fill="#17494a"/>
+    <text x="462" y="151" font-size="22" font-weight="700" fill="white">自分のPC</text>
+    <text x="462" y="185" font-size="18" fill="#deefea">PC補助ツール</text>
+    <text x="462" y="210" font-size="18" fill="#deefea">＋ Forge</text>
+    <path d="M28 287h624" stroke="#c9d6d2"/>
+    <text x="28" y="322" font-size="20" font-weight="700">最初の1回</text>
+    <text x="147" y="322" font-size="19">PCのQRをスマホで読み取って登録します。</text>
+    <text x="28" y="350" font-size="16" fill="#405c5a">2回目からは登録済みのPCへアプリが接続します。</text>
+  </g>
+</svg>

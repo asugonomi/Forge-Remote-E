@@ -10,21 +10,34 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 
 const val LOCAL_FORGE = "http://127.0.0.1:17870"
 
-class ForgeClient(val origin:String, private val token:String="") {
+internal suspend fun <T> withRouteRecovery(paired:Boolean,readOnly:Boolean,attempt:suspend ()->T):T =
+    try {attempt()} catch(e:IOException) {
+        // Mutating requests may already have reached Forge even when their response was lost.
+        if(!paired || !readOnly)throw e
+        attempt()
+    }
+
+class ForgeClient private constructor(val origin:String, private val token:String,internal val gateway:PairedGateway?,private val missingPair:Boolean=false) {
+    companion object {internal fun unavailable(origin:String)=ForgeClient(origin,"",null,true)}
+    constructor(origin:String, token:String=""):this(origin,token,null)
+    internal constructor(gateway:PairedGateway):this(gateway.pc.origin,"",gateway)
     init {
         val uri=URI(origin)
-        require(origin==LOCAL_FORGE || (uri.scheme=="https" && uri.host!=null && uri.userInfo==null &&
+        require(missingPair && origin.startsWith("paired:") || gateway!=null && origin==gateway.pc.origin || origin==LOCAL_FORGE || (uri.scheme=="https" && uri.host!=null && uri.userInfo==null &&
             uri.query==null && uri.fragment==null && uri.path.isNullOrEmpty())) { "HTTPS のホスト名を入力してください" }
     }
     suspend fun get(path:String):ByteArray = request(path,null)
     suspend fun post(path:String, body:JSONObject):JSONObject =
         withContext(Dispatchers.Default) { JSONObject(request(path,body).toString(Charsets.UTF_8).ifBlank { "{}" }) }
 
-    private fun connection(path:String):HttpURLConnection {
-        require(path.startsWith("/") && !path.startsWith("//"))
+    internal suspend fun connection(path:String,fresh:Boolean=false):HttpURLConnection {
+        check(!missingPair) {"このPCを接続設定からもう一度登録してください"}
+        require(path.startsWith("/") && !path.startsWith("//") && '\\' !in path && '\r' !in path && '\n' !in path)
+        gateway?.let{return it.open(path,fresh)}
         val bridge=path.startsWith("/forge-remote/")
         val base=if(bridge && origin==LOCAL_FORGE) "http://127.0.0.1:17872" else origin
         return (URL(base+path).openConnection() as HttpURLConnection).apply {
@@ -62,6 +75,7 @@ class ForgeClient(val origin:String, private val token:String="") {
                 }
                 result.resume(bytes)
             } catch(e:Exception) {
+                if(e is IOException) gateway?.failed(c.url.protocol+"://"+c.url.authority)
                 result.resumeWithException(e)
             } finally {
                 c.disconnect()
@@ -70,10 +84,14 @@ class ForgeClient(val origin:String, private val token:String="") {
     }
 
     private suspend fun request(path:String,body:JSONObject?):ByteArray=withContext(Dispatchers.IO) {
+        withRouteRecovery(gateway!=null,body==null){exchange(path,body)}
+    }
+
+    private suspend fun exchange(path:String,body:JSONObject?):ByteArray {
         val progressRequest=path=="/internal/progress"
         val maxResponseBytes=if(progressRequest) 8*1024*1024 else 96*1024*1024
-        val c=connection(path)
-        try {
+        val c=connection(path,body!=null && path in setOf("/sdapi/v1/txt2img","/sdapi/v1/img2img"))
+        return try {
             c.readTimeout=when {
                 progressRequest -> 8000
                 path.endsWith("2img") -> 1200000
@@ -96,6 +114,9 @@ class ForgeClient(val origin:String, private val token:String="") {
                 error("HTTP $status $detail")
             }
             c.readBytesLimited(maxResponseBytes)
+        } catch(e:IOException) {
+            gateway?.failed(c.url.protocol+"://"+c.url.authority)
+            throw e
         } finally { c.disconnect() }
     }
 }

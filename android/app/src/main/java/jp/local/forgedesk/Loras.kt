@@ -11,8 +11,6 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 
 internal val loraThumbnailId=Regex("[0-9a-f]{32}")
 
@@ -71,7 +69,7 @@ suspend fun ForgeClient.loraCatalog(): LoraCatalog = withContext(Dispatchers.IO)
     } catch(e:CancellationException) {throw e}
     catch(e:Exception) {
         // A stock Forge server provides raw safetensors metadata. Only names leave this reader.
-        val c=URL(origin+"/sdapi/v1/loras").openConnection() as HttpURLConnection
+        val c=connection("/sdapi/v1/loras")
         val raw=try {
             c.instanceFollowRedirects=false; c.connectTimeout=8000; c.readTimeout=45000
             require(c.responseCode in 200..299) {"LoRA一覧の取得に失敗しました（HTTP ${c.responseCode}）"}

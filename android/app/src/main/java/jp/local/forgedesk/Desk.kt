@@ -1,6 +1,7 @@
 package jp.local.forgedesk
 
 import android.os.Bundle
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.BackHandler
@@ -38,6 +39,7 @@ class Desk:ComponentActivity() {
     override fun onCreate(state:Bundle?) {
         super.onCreate(state)
         val vm=model
+        acceptPairLink(intent)
         val topology=WindowInfoTracker.getOrCreate(this).windowLayoutInfo(this)
         setContent {
             val layout by topology.collectAsState(null)
@@ -50,6 +52,18 @@ class Desk:ComponentActivity() {
             CompositionLocalProvider(LocalDensity provides compactDensity) {
                 MaterialTheme(colorScheme=palette) { Home(vm,hinge) }
             }
+        }
+    }
+    override fun onNewIntent(intent:Intent){
+        super.onNewIntent(intent)
+        acceptPairLink(intent)
+    }
+    private fun acceptPairLink(incoming:Intent?) {
+        val data=incoming?.data ?: return
+        if(incoming.action==Intent.ACTION_VIEW && data.scheme=="forgeremote" && data.host=="pair"){
+            model.readSetup(data.toString())
+            incoming.data=null
+            setIntent(Intent(this,Desk::class.java))
         }
     }
     override fun onStop(){
@@ -241,10 +255,11 @@ private val moreMenus=listOf("extensions" to "拡張","settings" to "接続")
     }
 }
 @Composable private fun Settings(vm:ForgeModel){
-    var host by remember(vm.client){mutableStateOf(vm.client.origin)}
+    var host by remember(vm.client){mutableStateOf(vm.client.origin.takeIf{it.startsWith("https://")}.orEmpty())}
     var token by remember{mutableStateOf("")}
     Page("接続設定"){
         Text("Forge Remote E（Everyone）1.0",style=MaterialTheme.typography.titleMedium)
+        Block("Wi-Fi・TailscaleでPCに接続"){PairSettings(vm)}
         Block("生成の初期値と下書き"){
             Row(horizontalArrangement=Arrangement.spacedBy(6.dp)){
                 FilterChip(!vm.imgMode,{vm.mode(false)},label={Text("テキストから")})
@@ -262,15 +277,15 @@ private val moreMenus=listOf("extensions" to "拡張","settings" to "接続")
                 confirmButton={TextButton(onClick={if(action=="device")vm.applyDeviceDefaults() else vm.loadProfile(true);action=""}){Text("適用")}},
                 dismissButton={TextButton(onClick={action=""}){Text("キャンセル")}})
         }
-        Block("PC の ForgeNeo"){
+        Block("接続状態・その他の接続方法"){
             Text(vm.online); Text(vm.bridge);Text(vm.profileStatus)
             if(vm.dictionaryStatus.isNotBlank())Text(vm.dictionaryStatus,style=MaterialTheme.typography.bodySmall)
             if(vm.checkpoint.isNotBlank()) Text(vm.checkpoint,style=MaterialTheme.typography.bodySmall)
-            OutlinedButton(onClick={vm.connect(LOCAL_FORGE,"")}){Text("ペアリング済みPCに接続")}
+            OutlinedButton(onClick={vm.connect(LOCAL_FORGE,"")}){Text("ADB転送でPCに接続")}
             OutlinedTextField(host,{host=it},label={Text("HTTPS サーバー")},modifier=Modifier.fillMaxWidth(),singleLine=true)
             OutlinedTextField(token,{token=it},label={Text("補助APIトークン（任意）")},singleLine=true,modifier=Modifier.fillMaxWidth(),visualTransformation=PasswordVisualTransformation())
             Button(onClick={vm.connect(host,token)}){Text("接続して確認")}
-            Text("トークンはアプリ終了まで保持します。",style=MaterialTheme.typography.bodySmall)
+            Text("手動のHTTPS接続で入力した補助APIトークンはアプリ終了まで保持します。",style=MaterialTheme.typography.bodySmall)
         }
     }
 }

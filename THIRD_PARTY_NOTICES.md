@@ -19,4 +19,6 @@ The source distribution includes the Gradle 8.7 Wrapper JAR, its configuration a
 
 ## PC companion and integration
 
-The companion imports FastAPI, Starlette, Pillow, Requests and Uvicorn from the PC's Python environment. The optional Forge integrations use the corresponding projects' installed software, models and dictionaries. Each project distributes its own license and notices with its installation.
+The companion imports FastAPI, Starlette, Pillow, Requests, Uvicorn and cryptography from the PC's Python environment. The optional Forge integrations use the corresponding projects' installed software, models and dictionaries. Each project distributes its own license and notices with its installation.
+
+The offline pairing card uses Project Nayuki's QR Code generator, version 1.8.0, under the MIT License. Copyright and license terms are retained in the distributed Python file. [Upstream source](https://github.com/nayuki/QR-Code-generator/blob/v1.8.0/python/qrcodegen.py)

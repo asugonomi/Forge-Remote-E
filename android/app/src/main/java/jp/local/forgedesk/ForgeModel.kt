@@ -15,7 +15,24 @@ internal const val PROFILE_PENDING="PCの生成設定を取得中"
 
 class ForgeModel(app:Application): AndroidViewModel(app) {
     private val prefs=app.getSharedPreferences("native",0)
-    var client by mutableStateOf(ForgeClient(prefs.getString("origin",LOCAL_FORGE) ?: LOCAL_FORGE))
+    private val vault=PairVault(app)
+    private var savedPair by mutableStateOf(runCatching {vault.load()}.getOrNull())
+    internal val rememberedPc:PairedPc? get()=savedPair?.pc
+    internal var pendingCode by mutableStateOf<SetupCode?>(null)
+        private set
+    var pairingBusy by mutableStateOf(false)
+        private set
+    var pairingError by mutableStateOf("")
+        private set
+    private fun initialClient():ForgeClient {
+        val origin=prefs.getString("origin",LOCAL_FORGE) ?: LOCAL_FORGE
+        if(origin.startsWith("paired:")){
+            return savedPair?.takeIf{it.pc.origin==origin}?.let{ForgeClient(PairedGateway(getApplication(),it))}
+                ?: ForgeClient.unavailable(origin)
+        }
+        return runCatching{ForgeClient(origin)}.getOrElse{ForgeClient(LOCAL_FORGE)}
+    }
+    var client by mutableStateOf(initialClient())
         private set
     var tab by mutableStateOf("gen")
     var prompt by mutableStateOf("")
@@ -76,17 +93,56 @@ class ForgeModel(app:Application): AndroidViewModel(app) {
     }
     fun notify(text:String) { Toast.makeText(getApplication(),text,Toast.LENGTH_LONG).show() }
     fun connect(host:String,token:String) {
-        runCatching { ForgeClient(host.trim().trimEnd('/'),token) }.onSuccess {
-            if(client.origin!=it.origin) {
+        runCatching { ForgeClient(host.trim().trimEnd('/'),token) }.onSuccess(::activate)
+            .onFailure { notify(it.message ?: "接続先を確認してください") }
+    }
+    private fun activate(next:ForgeClient) {
+            if(client.origin!=next.origin) {
                 persistDraft(true)
                 extensionSettings.clear(); adDetailer.clear(); input=null
-                client=it
+                client=next
                 openEndpoint()
             } else {
-                client=it
+                client=next
             }
-            prefs.edit().putString("origin",it.origin).apply(); refresh()
-        }.onFailure { notify(it.message ?: "接続先を確認してください") }
+            prefs.edit().putString("origin",next.origin).apply(); refresh()
+    }
+    fun readSetup(code:String) {
+        if(pairingBusy)return
+        tab="settings";pairingError=""
+        pendingCode=runCatching{SetupCode.parse(code)}.getOrElse {
+            pairingError="PCの新しいペアリングコードを貼り付けてください";null
+        }
+    }
+    fun cancelSetup() {if(!pairingBusy){pendingCode=null;pairingError=""}}
+    fun pair() {
+        val setup=pendingCode ?: return
+        if(pairingBusy)return
+        pairingBusy=true;pairingError=""
+        viewModelScope.launch {
+            try {
+                val saved=withContext(Dispatchers.IO) {
+                    vault.prepare()
+                    PairedGateway.redeem(getApplication(),setup).also { vault.save(it) }
+                }
+                savedPair=saved;pendingCode=null
+                activate(ForgeClient(PairedGateway(getApplication(),saved)))
+                notify("PCを登録しました")
+            } catch(e:CancellationException){throw e}
+            catch(e:Exception){
+                pairingError=when(e){
+                    is java.security.GeneralSecurityException->"端末に接続情報を安全に保存できません。PCのコードを再発行してください"
+                    is java.io.IOException->e.localizedMessage.orEmpty().take(140)
+                    else->"PCを登録できません。PCで新しいコードを発行してください"
+                }
+            } finally {pairingBusy=false}
+        }
+    }
+    fun useRememberedPc(){savedPair?.let{activate(ForgeClient(PairedGateway(getApplication(),it)))}}
+    fun forgetPc(){
+        runCatching{vault.forget()}.onFailure{notify("登録を解除できません");return}
+        savedPair=null;pendingCode=null;pairingError=""
+        if(client.origin.startsWith("paired:"))activate(ForgeClient(LOCAL_FORGE))
     }
     fun refresh() {
         val remote=client
