@@ -1,12 +1,13 @@
 # Forge Remote E
 
-Forge Remote E（**Everyone**）は、自分のPCで動いているForgeをAndroidのタッチ画面から操作する一般配布版です。画像生成はPCで実行します。スマートフォンにはプロンプト、生成キュー、画像ギャラリー、LoRA一覧を備えています。
+Forge Remote E（**Everyone**）は、自分のPCで動いているForgeをスマートフォンから操作する一般配布版です。Androidアプリと、iPhoneのSafariからホーム画面に追加できるWebアプリを配布しています。どちらも画像生成はPCで実行します。
 
-**[APKとPC補助ツールをダウンロード](https://github.com/asugonomi/Forge-Remote-E/releases/latest)** · **[画像付きの日本語操作ガイド](docs/guide-ja.md)**
+| 端末 | ダウンロード | 画像付き操作ガイド |
+| --- | --- | --- |
+| Android | [Android 1.0 のAPKとPC用ZIP](https://github.com/asugonomi/Forge-Remote-E/releases/tag/v1.0) | [Androidの接続と操作](docs/guide-ja.md) |
+| iPhone | [iOS 1.0 のPC用ZIP](https://github.com/asugonomi/Forge-Remote-E/releases/download/ios-v1.0/Forge-Remote-iOS-PC-1.0.zip) | [iPhoneの登録と操作](docs/ios-guide-ja.md) |
 
-どなたでも配布APKと付属のPC補助ツールをダウンロードし、ご自身の環境にインストールして使用できます。
-
-## はじめに
+## Androidで使う
 
 Android 8.0以降の端末と、HTTP APIを有効にしたForgeが必要です。Windowsでの接続手順は次のとおりです。
 
@@ -64,4 +65,6 @@ PC補助ツールのコードと検証用のデータを生成するテストは
 
 ## English quick start
 
-The E in Forge Remote E stands for **Everyone**. Download the signed APK and Windows companion ZIP from the [latest release](https://github.com/asugonomi/Forge-Remote-E/releases/latest). Start your own Forge with its API enabled. Double-click **Forge Remote E.cmd** in the extracted ZIP folder. Join your home Wi-Fi, scan the PC's one-time QR code and confirm the PC in the app. For remote use, connect both devices to the same Tailscale network before starting the companion and issuing a pairing code. The app uses the compatible extensions and dictionaries from your PC. [Illustrated Japanese guide](docs/guide-ja.md)
+The E in Forge Remote E stands for **Everyone**. On Android, download the signed APK and Windows companion ZIP. Start Forge with its API enabled, extract the ZIP, and double-click **Forge Remote E.cmd**. Join your home Wi-Fi, scan the PC's QR code and confirm the PC in the app. For remote use, connect both devices to the same Tailscale network before starting the companion. [Android release](https://github.com/asugonomi/Forge-Remote-E/releases/tag/v1.0) · [Illustrated Japanese guide](docs/guide-ja.md)
+
+On iPhone, connect the PC and phone to the same Tailscale network. Extract the iOS companion ZIP on Windows, open **Forge Remote iOS.cmd**, and scan the QR code with the iPhone camera. In Safari, choose **Share → Add to Home Screen**. Once the PC accepts a job, it continues generating when the phone is locked. [iOS release](https://github.com/asugonomi/Forge-Remote-E/releases/tag/ios-v1.0) · [Illustrated Japanese guide](docs/ios-guide-ja.md)
