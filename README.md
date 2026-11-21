@@ -1,11 +1,11 @@
 # Forge Remote E
 
-Forge Remote E（**Everyone**）は、自分のPCで動いているForgeをスマートフォンから操作する一般配布版です。Androidアプリと、iPhoneのSafariからホーム画面に追加できるWebアプリを配布しています。どちらも画像生成はPCで実行します。
+Forge Remote E（**Everyone**）は、自分のPCで動いているForgeをAndroidから操作する一般配布版です。iPhone向けのWebアプリは専用リポジトリで配布しています。
 
 | 端末 | ダウンロード | 画像付き操作ガイド |
 | --- | --- | --- |
 | Android | [Android 1.0 のAPKとPC用ZIP](https://github.com/asugonomi/Forge-Remote-E/releases/tag/v1.0) | [Androidの接続と操作](docs/guide-ja.md) |
-| iPhone | [iOS 1.0 のPC用ZIP](https://github.com/asugonomi/Forge-Remote-E/releases/download/ios-v1.0/Forge-Remote-iOS-PC-1.0.zip) | [iPhoneの登録と操作](docs/ios-guide-ja.md) |
+| iPhone | [Forge Remote iOS のRelease](https://github.com/asugonomi/Forge-Remote-iOS/releases/latest) | [iPhoneの登録と操作](https://github.com/asugonomi/Forge-Remote-iOS/blob/main/docs/ios-guide-ja.md) |
 
 ## Androidで使う
 
@@ -50,7 +50,7 @@ ADB接続にも対応します。PCで `.\Start-Companion.ps1 -ForgeRoot 'D:\AI\
 
 ## iPhoneで使う
 
-PCとiPhoneを同じTailscaleネットワークに接続し、PCで **「Forge Remote iOS.cmd」** を開きます。iPhoneのカメラでQRを読み、Safariの共有メニューから **「ホーム画面に追加」** を選びます。受け付けた生成はiPhoneをロックした後もPCで続きます。[iPhone版の画像付き操作ガイド](docs/ios-guide-ja.md)
+iPhone版のPC用ZIPと画像付きの登録手順は専用リポジトリにあります。[Forge Remote iOS](https://github.com/asugonomi/Forge-Remote-iOS)
 
 ## ビルド
 
@@ -67,4 +67,4 @@ PC補助ツールのコードと検証用のデータを生成するテストは
 
 The E in Forge Remote E stands for **Everyone**. On Android, download the signed APK and Windows companion ZIP. Start Forge with its API enabled, extract the ZIP, and double-click **Forge Remote E.cmd**. Join your home Wi-Fi, scan the PC's QR code and confirm the PC in the app. For remote use, connect both devices to the same Tailscale network before starting the companion. [Android release](https://github.com/asugonomi/Forge-Remote-E/releases/tag/v1.0) · [Illustrated Japanese guide](docs/guide-ja.md)
 
-On iPhone, connect the PC and phone to the same Tailscale network. Extract the iOS companion ZIP on Windows, open **Forge Remote iOS.cmd**, and scan the QR code with the iPhone camera. In Safari, choose **Share → Add to Home Screen**. Once the PC accepts a job, it continues generating when the phone is locked. [iOS release](https://github.com/asugonomi/Forge-Remote-E/releases/tag/ios-v1.0) · [Illustrated Japanese guide](docs/ios-guide-ja.md)
+The iPhone web app, its Windows companion and the illustrated setup guide are available in the dedicated [Forge Remote iOS repository](https://github.com/asugonomi/Forge-Remote-iOS).
