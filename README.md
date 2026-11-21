@@ -47,6 +47,10 @@ Tag Autocomplete本家とNeo系の互換CSVを対象にしています。候補�
 
 ADB接続にも対応します。PCで `.\Start-Companion.ps1 -ForgeRoot 'D:\AI\Forge'` を起動し、Android SDK Platform Toolsで端末を認証します。別のPowerShellで `.\Connect-ForgeRemote.ps1` を実行し、アプリの「接続」→「ADB転送でPCに接続」を選びます。[Android公式のADB手順](https://developer.android.com/tools/adb)
 
+## iPhoneで使う
+
+PCとiPhoneを同じTailscaleネットワークに接続し、PCで **「Forge Remote iOS.cmd」** を開きます。iPhoneのカメラでQRを読み、Safariの共有メニューから **「ホーム画面に追加」** を選びます。受け付けた生成はiPhoneをロックした後もPCで続きます。[iPhone版の画像付き操作ガイド](docs/ios-guide-ja.md)
+
 ## ビルド
 
 Androidプロジェクトは `android/` にあります。JDK 17、Android SDK 35、Build Tools 35.0.0を用意します。

@@ -17,7 +17,6 @@ import time
 
 from gateway_discovery import announce
 from gateway_http import GatewayServer
-from gateway_state import GatewayState
 from pairing_card import show_pairing_card
 
 LAN = tuple(map(ipaddress.ip_network, ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")))
@@ -102,7 +101,7 @@ def _companion_ready(port):
 
 
 @contextmanager
-def local_companion(args):
+def local_companion(args, *, start_process=None):
     if _companion_ready(args.companion_port):
         print("Using the running E companion on loopback.")
         yield
@@ -119,7 +118,7 @@ def local_companion(args):
             cmd.extend(["--"+flag.replace("_","-"), str(value)])
     for item in args.lora_root:
         cmd.extend(["--lora-root", str(item)])
-    process = subprocess.Popen(cmd, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    process = (start_process or subprocess.Popen)(cmd, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     try:
         for _ in range(60):
             if process.poll() is not None:
@@ -166,6 +165,7 @@ def default_state():
 
 
 def run(args, stop_event=None):
+    from gateway_state import GatewayState
     if len({args.port,args.companion_port,args.forge_port})!=3 or not all(
         1<=p<=65535 for p in (args.port,args.companion_port,args.forge_port)):
         raise ValueError("Gateway, companion and Forge require three different ports in 1..65535.")

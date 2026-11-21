@@ -52,6 +52,8 @@ def destination(method, target):
         local = "forge"
     else:
         return None
+    if not parts.query:
+        return local
     keys = [k for k, _ in parse_qsl(parts.query, keep_blank_values=True, strict_parsing=True, max_num_fields=5)]
     return local if set(keys) <= allowed and len(set(keys))==len(keys) else None
 

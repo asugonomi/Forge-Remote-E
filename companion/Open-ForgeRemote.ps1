@@ -136,7 +136,7 @@ function Select-ForgePython([string]$Root) {
     } finally { $picker.Dispose() }
 }
 
-function Open-ForgeRemote {
+function Get-ForgeLauncherSettings([string]$ForgeRoot, [string]$Python, [int]$ForgePort) {
     $config=Join-Path $env:LOCALAPPDATA 'ForgeRemoteE\launcher.json'
     $saved=Read-ForgeLauncherConfig $config
     if ($ForgeRoot) {
@@ -176,10 +176,16 @@ function Open-ForgeRemote {
     elseif ($saved -and $saved.root -eq $root) { $port=$saved.port }
     $record=[pscustomobject]@{root=$root;python=$interpreter;port=$port}
     Save-ForgeLauncherConfig $config $record
+    return $record
+}
+
+function Open-ForgeRemote {
+    $record=Get-ForgeLauncherSettings $ForgeRoot $Python $ForgePort
+    if (!$record) { return }
     Write-Host 'Forge Remote E（Everyone）'
     Write-Host 'ブラウザーにQRコードを表示します。スマートフォンのカメラで読み取り、Forge Remote Eで開いてください。'
     Write-Host '使っている間は最初のウィンドウを開いたままにしてください。別のスマートフォンを登録するときは、同じファイルをもう一度ダブルクリックします。'
-    & (Join-Path $PSScriptRoot 'Start-Network.ps1') -ForgeRoot $root -Python $interpreter -ForgePort $port -Pair
+    & (Join-Path $PSScriptRoot 'Start-Network.ps1') -ForgeRoot $record.root -Python $record.python -ForgePort $record.port -Pair
     if ($LASTEXITCODE -ne 0) { throw '接続を開始できませんでした。上に表示されたメッセージを確認してください。' }
 }
 
